@@ -6,6 +6,8 @@ build
 .claude
 .windsurf
 
+req.http
+
 # Logs
 logs
 *.log
