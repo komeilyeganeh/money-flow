@@ -1,5 +1,5 @@
 import type { LoginRequest } from "../types/auth";
-import { api } from "./api";
+import { api, refreshApi } from "./api";
 
 export const authService = {
   async login(data: LoginRequest) {
@@ -13,5 +13,10 @@ export const authService = {
         Authorization: `Bearer ${refreshToken}`,
       },
     });
+  },
+
+  async refresh(refreshToken: string) {
+    const response = await refreshApi.post("/auth/refresh", { refreshToken });
+    return response.data;
   },
 };

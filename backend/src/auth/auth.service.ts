@@ -51,10 +51,7 @@ export class AuthService {
   async login(dto: LoginUserDto) {
     const user = await this.authRepository.findByEmailWithPassword(dto.email);
     if (!user) throw new UnauthorizedException('Email or password incorrect');
-    const comparePassword = await bcrypt.compare(
-      dto.password,
-      user.password,
-    );
+    const comparePassword = await bcrypt.compare(dto.password, user.password);
     if (!comparePassword)
       throw new UnauthorizedException('Email or password incorrect');
     const payload = {
@@ -94,5 +91,51 @@ export class AuthService {
   async logoutAllDevices(userId: string) {
     await this.authRepository.deleteAllUserRefreshTokens(userId);
     return { message: 'Logged out from all devices' };
+  }
+
+  async refresh(refreshToken: string) {
+    const storedToken =
+      await this.authRepository.findRefreshToken(refreshToken);
+    if (!storedToken) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    if (storedToken.revokedAt) {
+      throw new UnauthorizedException('Refresh token has been revoked');
+    }
+
+    if (storedToken.expiresAt <= new Date()) {
+      throw new UnauthorizedException('Refresh token has expired');
+    }
+
+    const user = await this.authRepository.findById(storedToken.id);
+    if (!user) {
+      throw new UnauthorizedException('User no longer exists');
+    }
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+    };
+    const [accessToken, newRefreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        expiresIn: '15m',
+      }),
+      this.jwtService.signAsync(payload, {
+        expiresIn: '7d',
+      }),
+    ]);
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    await this.authRepository.revokeRefreshToken(refreshToken);
+    await this.authRepository.saveRefreshToken(
+      user.id,
+      newRefreshToken,
+      expiresAt,
+    );
+    return {
+      accessToken,
+      refreshToken: newRefreshToken,
+    };
   }
 }

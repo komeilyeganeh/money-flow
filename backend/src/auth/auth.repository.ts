@@ -45,6 +45,12 @@ export class AuthRepository {
     });
   }
 
+  findRefreshToken(token: string) {
+    return this.prisma.refreshToken.findUnique({
+      where: { token },
+    });
+  }
+
   revokeRefreshToken(token: string) {
     return this.prisma.refreshToken.update({
       where: { token },
