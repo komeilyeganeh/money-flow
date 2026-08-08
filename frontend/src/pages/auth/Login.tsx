@@ -1,8 +1,8 @@
 import { Button, Form, Input, message } from "antd";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
-import { authService } from "../../services/auth.service";
 import { useNavigate } from "react-router";
 import { useEffect } from "react";
+import { useAuth } from "../../hooks/useAuth";
 
 type LoginFormValues = {
   email: string;
@@ -11,6 +11,7 @@ type LoginFormValues = {
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const accessToken = localStorage.getItem("accessToken");
 
   useEffect(() => {
@@ -20,10 +21,7 @@ export default function Login() {
   }, [accessToken, navigate]);
   const onFinish = async (values: LoginFormValues) => {
     try {
-      const result = await authService.login(values);
-      localStorage.setItem("accessToken", result.accessToken);
-      localStorage.setItem("refreshToken", result.refreshToken);
-      localStorage.setItem("user", JSON.stringify(result.user));
+      await login(values);
 
       message.success("Welcome back!");
       navigate("/dashboard");

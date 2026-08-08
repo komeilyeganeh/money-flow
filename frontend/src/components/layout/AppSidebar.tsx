@@ -6,8 +6,10 @@ import {
   TagOutlined,
 } from "@ant-design/icons";
 import { Avatar } from "antd";
+import { useAuth } from "../../hooks/useAuth";
 
 function AppSidebar() {
+  const { user } = useAuth();
   return (
     <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-slate-200 bg-white lg:flex lg:flex-col">
       {/* Logo */}
@@ -58,14 +60,14 @@ function AppSidebar() {
       {/* Bottom */}
       <div className="border-t border-slate-100 p-4">
         <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
-          <Avatar className="bg-indigo-100! text-indigo-600!">A</Avatar>
+          <Avatar className="bg-indigo-100! text-indigo-600!">{user?.firstName.split('')[0]}</Avatar>
 
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-slate-800">
-              Alex Morgan
+              {user?.firstName} {user?.lastName}
             </p>
 
-            <p className="truncate text-xs text-slate-400">alex@example.com</p>
+            <p className="truncate text-xs text-slate-400">{user?.email}</p>
           </div>
         </div>
       </div>

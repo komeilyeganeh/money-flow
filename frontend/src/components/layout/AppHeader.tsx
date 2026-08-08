@@ -4,6 +4,8 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Avatar, Dropdown, type MenuProps } from "antd";
+import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router";
 
 const userMenu: MenuProps["items"] = [
   {
@@ -23,10 +25,20 @@ const userMenu: MenuProps["items"] = [
     key: "logout",
     icon: <LogoutOutlined />,
     label: "Logout",
+    danger: true
   },
 ];
 
 function AppHeader() {
+  const { user, logout } = useAuth();
+  3;
+  const navigate = useNavigate();
+  const handleMenuClick: MenuProps["onClick"] = ({ key }) => {
+    if (key === "logout") {
+      logout();
+      navigate("/login", { replace: true });
+    }
+  };
   return (
     <header className="flex h-20 items-center justify-between border-b border-slate-200 bg-white px-6 lg:px-10">
       <div>
@@ -35,12 +47,17 @@ function AppHeader() {
         <h1 className="text-lg font-bold text-slate-900">Dashboard</h1>
       </div>
 
-      <Dropdown menu={{ items: userMenu }} trigger={["click"]}>
+      <Dropdown
+        menu={{ items: userMenu, onClick: handleMenuClick }}
+        trigger={["click"]}
+      >
         <button className="flex items-center gap-3 rounded-xl px-2 py-1.5 transition hover:bg-slate-50">
-          <Avatar className="bg-indigo-100! text-indigo-600!">A</Avatar>
+          <Avatar className="bg-indigo-100! text-indigo-600!">{user?.firstName.split('')[0]}</Avatar>
 
           <div className="hidden text-left sm:block">
-            <p className="text-sm font-semibold">Alex Morgan</p>
+            <p className="text-sm font-semibold">
+              {user?.firstName} {user?.lastName}
+            </p>
 
             <p className="text-xs text-slate-400">Personal account</p>
           </div>
